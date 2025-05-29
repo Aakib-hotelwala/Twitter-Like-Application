@@ -1,0 +1,40 @@
+import { Routes, Route, Navigate } from "react-router-dom";
+import HomeLayout from "../src/layout/HomeLayout"; // ✅ renamed properly
+import Login from "../src/pages/Login";
+import Profile from "../src/pages/Profile";
+import ProtectedRoute from "../src/components/ProtectedRoute";
+import useThemeStore from "../src/store/themeStore";
+import { useEffect } from "react";
+import TweetFeed from "../src/pages/TweetFeed"; // 🆕 default main content
+import Tweet from "./pages/Tweet";
+
+const App = () => {
+  const { theme } = useThemeStore();
+
+  useEffect(() => {
+    document.documentElement.classList.remove("light", "dark");
+    document.documentElement.classList.add(theme);
+  }, [theme]);
+
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+
+      {/* Protected layout route */}
+      <Route element={<ProtectedRoute allowedRoles={["user", "admin"]} />}>
+        <Route path="/" element={<HomeLayout />}>
+          {/* Nested routes under layout */}
+          <Route index element={<TweetFeed />} /> {/* 🟢 default home */}
+          <Route path="tweet/:tweetId" element={<Tweet />} />"
+          <Route path="profile" element={<Profile />} />
+          {/* Add likes/comments later if needed */}
+        </Route>
+      </Route>
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/login" />} />
+    </Routes>
+  );
+};
+
+export default App;
