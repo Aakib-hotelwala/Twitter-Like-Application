@@ -9,6 +9,7 @@ import {
   GetTweetsByHashtagController,
   GetTrendingHashtagsController,
   GetTweetsByUsernameController,
+  GetTweetByIdController,
 } from "../controllers/tweet.controller.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadImageMiddleware.js";
@@ -22,6 +23,7 @@ router.post(
   CreateTweetController
 );
 router.get("/all-tweets", requireAuth, GetTweetsController);
+router.get("/:id", requireAuth, GetTweetByIdController);
 router.put(
   "/update/:id",
   requireAuth,

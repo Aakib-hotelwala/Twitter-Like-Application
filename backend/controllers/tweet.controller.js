@@ -64,6 +64,33 @@ export const GetTweetsController = async (req, res) => {
   }
 };
 
+// =============== Get Single Tweet ===============
+export const GetTweetByIdController = async (req, res) => {
+  try {
+    const tweetId = req.params.id;
+
+    const tweet = await TweetModel.findById(tweetId)
+      .populate("user", "fullName username profilePicture")
+      .populate("retweet")
+      .lean();
+
+    if (!tweet || tweet.isDeleted) {
+      return res.status(404).json({ error: true, message: "Tweet not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      tweet,
+    });
+  } catch (error) {
+    console.error("Get Tweet By ID Error:", error);
+    return res.status(500).json({
+      error: true,
+      message: "Internal Server Error",
+    });
+  }
+};
+
 // =============== Update Tweet ===============
 export const UpdateTweetController = async (req, res) => {
   try {
