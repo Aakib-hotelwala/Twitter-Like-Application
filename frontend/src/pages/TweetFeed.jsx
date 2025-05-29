@@ -9,6 +9,7 @@ import {
 import { get, put, post } from "../services/endpoints";
 import useAuthStore from "../store/authStore";
 import { useNavigate } from "react-router-dom";
+import ClipLoader from "react-spinners/ClipLoader";
 
 const TweetFeed = () => {
   const { user } = useAuthStore();
@@ -140,7 +141,9 @@ const TweetFeed = () => {
       {/* Tweets List */}
       <div className="space-y-4 mt-4">
         {loading ? (
-          <p className="text-center text-gray-400">Loading tweets...</p>
+          <div className="flex justify-center items-center py-20">
+            <ClipLoader color="#9ca3af" size={40} />
+          </div>
         ) : tweets.length === 0 ? (
           <p className="text-center text-gray-400">No tweets found.</p>
         ) : (

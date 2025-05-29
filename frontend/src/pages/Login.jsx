@@ -28,26 +28,25 @@ const Login = () => {
   };
 
   return (
-    <section className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-gray-800 text-white shadow-lg rounded-lg p-6">
+    <section className="min-h-screen bg-black flex items-center justify-center px-4">
+      <div className="w-full max-w-md bg-[#16181C] text-white shadow-2xl rounded-2xl p-8">
+        {/* Header */}
         <div className="flex items-center justify-center mb-6">
           <img src="/vite.svg" alt="logo" className="h-8 w-8 mr-2" />
-          <Link
-            to="/"
-            className="text-xl font-semibold text-white hover:text-blue-400"
-          >
+          <p className="text-2xl font-bold text-white hover:text-blue-500">
             Twitter
-          </Link>
+          </p>
         </div>
-        <h2 className="text-xl font-bold text-white mb-4">
+
+        {/* Title */}
+        <h2 className="text-2xl font-semibold text-white mb-6">
           Sign in to your account
         </h2>
-        <form className="space-y-4" onSubmit={handleSubmit}>
+
+        {/* Form */}
+        <form className="space-y-5" onSubmit={handleSubmit}>
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-300 mb-1"
-            >
+            <label htmlFor="email" className="block text-sm text-gray-400 mb-1">
               Your email
             </label>
             <input
@@ -57,13 +56,14 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="xyz@email.com"
               required
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-[#1F1F23] border border-[#2f3336] rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-300 mb-1"
+              className="block text-sm text-gray-400 mb-1"
             >
               Password
             </label>
@@ -74,19 +74,25 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-[#1F1F23] border border-[#2f3336] rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-200 cursor-pointer"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md font-semibold transition duration-200 cursor-pointer"
           >
             Sign in
           </button>
         </form>
-        <p className="mt-4 text-center text-sm text-gray-400">
-          Don’t have an account yet?{" "}
-          <Link to="/register" className="text-blue-400 hover:underline">
+
+        {/* Footer */}
+        <p className="mt-6 text-center text-sm text-gray-500">
+          Don’t have an account?{" "}
+          <Link
+            to="/register"
+            className="text-blue-500 hover:underline font-medium"
+          >
             Sign up
           </Link>
         </p>

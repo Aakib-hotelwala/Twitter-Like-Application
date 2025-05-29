@@ -6,7 +6,7 @@ import ProtectedRoute from "../src/components/ProtectedRoute";
 import useThemeStore from "../src/store/themeStore";
 import { useEffect } from "react";
 import TweetFeed from "../src/pages/TweetFeed"; // 🆕 default main content
-import Tweet from "./pages/Tweet";
+import TweetPage from "./pages/TweetPage";
 
 const App = () => {
   const { theme } = useThemeStore();
@@ -25,7 +25,7 @@ const App = () => {
         <Route path="/" element={<HomeLayout />}>
           {/* Nested routes under layout */}
           <Route index element={<TweetFeed />} /> {/* 🟢 default home */}
-          <Route path="tweet/:tweetId" element={<Tweet />} />"
+          <Route path="tweet/:id" element={<TweetPage />} />"
           <Route path="profile" element={<Profile />} />
           {/* Add likes/comments later if needed */}
         </Route>
