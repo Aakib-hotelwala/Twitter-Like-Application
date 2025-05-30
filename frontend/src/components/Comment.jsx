@@ -1,17 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { get } from "../services/endpoints";
+import { get, put } from "../services/endpoints";
 import ClipLoader from "react-spinners/ClipLoader";
+import { FaHeart, FaRegComment } from "react-icons/fa";
 
 const Comment = ({ comment }) => {
   const [replies, setReplies] = useState([]);
   const [loadingReplies, setLoadingReplies] = useState(false);
+  const [hasReplies, setHasReplies] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
+
+  const [likesCount, setLikesCount] = useState(comment.likes?.length || 0);
+  const [isLiked, setIsLiked] = useState(comment.isLiked || false); // fallback if you support it
 
   const fetchReplies = async () => {
     setLoadingReplies(true);
     try {
       const res = await get(`/comments/reply/${comment._id}`);
-      setReplies(res.replies || []);
+      const repliesData = res.replies || [];
+      setReplies(repliesData);
+      setHasReplies(repliesData.length > 0);
     } catch (err) {
       console.error("Failed to load replies", err);
     } finally {
@@ -20,9 +27,21 @@ const Comment = ({ comment }) => {
   };
 
   const handleToggleReplies = () => {
-    setShowReplies(!showReplies);
-    if (!showReplies && replies.length === 0) {
+    if (!showReplies && !hasReplies) {
       fetchReplies();
+    }
+    setShowReplies(!showReplies);
+  };
+
+  const handleLike = async (commentId) => {
+    try {
+      const res = await put(`/comments/like/${commentId}`);
+      if (res.success) {
+        setLikesCount(res.likesCount);
+        setIsLiked(res.isLiked);
+      }
+    } catch (err) {
+      console.error("Failed to toggle like", err);
     }
   };
 
@@ -34,7 +53,7 @@ const Comment = ({ comment }) => {
           alt="profile"
           className="w-8 h-8 rounded-full"
         />
-        <div>
+        <div className="flex flex-col">
           <p className="text-sm text-gray-300 font-semibold">
             {comment.user.fullName}{" "}
             <span className="text-gray-500">@{comment.user.username}</span>
@@ -44,12 +63,37 @@ const Comment = ({ comment }) => {
             {new Date(comment.createdAt).toLocaleString()}
           </p>
 
-          <button
-            onClick={handleToggleReplies}
-            className="text-sm text-blue-400 mt-2"
+          {/* Actions: Likes and Replies count */}
+          <div
+            className="flex items-center gap-6 text-gray-400 mt-3 text-sm"
+            onClick={(e) => e.stopPropagation()}
           >
-            {showReplies ? "Hide Replies" : "View Replies"}
-          </button>
+            <div
+              className={`flex items-center gap-1 cursor-pointer ${
+                isLiked ? "text-red-500" : "hover:text-red-500"
+              }`}
+              onClick={() => handleLike(comment._id)}
+            >
+              <FaHeart />
+              <span>{likesCount}</span>
+            </div>
+            <div
+              className="flex items-center gap-1 hover:text-blue-400 cursor-pointer"
+              onClick={handleToggleReplies}
+            >
+              <FaRegComment />
+              <span>{hasReplies ? replies.length : 0}</span>
+            </div>
+          </div>
+
+          {hasReplies && (
+            <button
+              onClick={handleToggleReplies}
+              className="text-sm text-blue-400 mt-2"
+            >
+              {showReplies ? "Hide Replies" : "View Replies"}
+            </button>
+          )}
 
           {loadingReplies && (
             <div className="mt-2">

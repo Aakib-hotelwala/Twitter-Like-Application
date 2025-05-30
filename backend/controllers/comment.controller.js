@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import CommentModel from "../models/comment.model.js";
 import TweetModel from "../models/tweet.model.js"; // optional, for validation
 
@@ -36,6 +37,7 @@ export const CreateComment = async (req, res) => {
 export const GetCommentsByTweet = async (req, res) => {
   try {
     const tweetId = req.params.tweetId;
+    const currentUserId = req.user._id;
 
     const comments = await CommentModel.find({
       tweet: tweetId,
@@ -45,7 +47,17 @@ export const GetCommentsByTweet = async (req, res) => {
       .populate("user", "username profilePicture") // populate user info
       .sort({ createdAt: -1 });
 
-    res.status(200).json({ success: true, comments });
+    // Add likesCount and isLiked properties
+    const processedComments = comments.map((comment) => {
+      const likesArray = comment.likes || [];
+      return {
+        ...comment.toObject(),
+        likesCount: likesArray.length,
+        isLiked: likesArray.some((userId) => userId.equals(currentUserId)),
+      };
+    });
+
+    res.status(200).json({ success: true, comments: processedComments });
   } catch (error) {
     console.error("Get Comments By Tweet Error:", error);
     res.status(500).json({ error: true, message: "Internal Server Error" });
@@ -135,8 +147,18 @@ export const DeleteComment = async (req, res) => {
 // Like or Unlike a comment
 export const ToggleLikeComment = async (req, res) => {
   try {
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ error: true, message: "Unauthorized" });
+    }
+
     const commentId = req.params.commentId;
     const userId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(commentId)) {
+      return res
+        .status(400)
+        .json({ error: true, message: "Invalid Comment ID" });
+    }
 
     const comment = await CommentModel.findById(commentId);
 
@@ -146,23 +168,29 @@ export const ToggleLikeComment = async (req, res) => {
         .json({ error: true, message: "Comment not found" });
     }
 
-    const likeIndex = comment.likes.findIndex(
+    comment.likes = comment.likes || [];
+
+    const hasLiked = comment.likes.some(
       (id) => id.toString() === userId.toString()
     );
 
-    if (likeIndex === -1) {
-      // Not liked yet, add like
-      comment.likes.push(userId);
+    if (hasLiked) {
+      comment.likes = comment.likes.filter(
+        (id) => id.toString() !== userId.toString()
+      );
     } else {
-      // Already liked, remove like
-      comment.likes.splice(likeIndex, 1);
+      comment.likes.push(userId);
     }
 
     await comment.save();
 
-    res.status(200).json({ success: true, likesCount: comment.likes.length });
+    res.status(200).json({
+      success: true,
+      likesCount: comment.likes.length,
+      isLiked: !hasLiked,
+    });
   } catch (error) {
-    console.error("Toggle Like Comment Error:", error);
+    console.error("Toggle Like Comment Error:", error); // Log exact error
     res.status(500).json({ error: true, message: "Internal Server Error" });
   }
 };
