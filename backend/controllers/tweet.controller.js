@@ -1,6 +1,7 @@
 import TweetModel from "../models/tweet.model.js";
 import cloudinary from "../config/cloudinary.js";
 import UserModel from "../models/user.model.js";
+import CommentModel from "../models/comment.model.js";
 
 // =============== Create Tweet ===============
 export const CreateTweetController = async (req, res) => {
@@ -49,11 +50,29 @@ export const GetTweetsController = async (req, res) => {
     const tweets = await TweetModel.find(filter)
       .populate("user", "fullName username profilePicture")
       .populate("retweet")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean(); // use .lean() to allow adding commentCount manually
+
+    // Fetch comment counts in parallel for better performance
+    const tweetIds = tweets.map((t) => t._id);
+    const commentCounts = await CommentModel.aggregate([
+      { $match: { tweet: { $in: tweetIds }, isDeleted: false } },
+      { $group: { _id: "$tweet", count: { $sum: 1 } } },
+    ]);
+
+    const countMap = {};
+    commentCounts.forEach((item) => {
+      countMap[item._id.toString()] = item.count;
+    });
+
+    const tweetsWithCommentCount = tweets.map((tweet) => ({
+      ...tweet,
+      commentCount: countMap[tweet._id.toString()] || 0,
+    }));
 
     return res.status(200).json({
       success: true,
-      tweets,
+      tweets: tweetsWithCommentCount,
     });
   } catch (error) {
     console.error("Get Tweets Error:", error);
@@ -77,6 +96,13 @@ export const GetTweetByIdController = async (req, res) => {
     if (!tweet || tweet.isDeleted) {
       return res.status(404).json({ error: true, message: "Tweet not found" });
     }
+
+    const commentCount = await CommentModel.countDocuments({
+      tweet: tweet._id,
+      isDeleted: false,
+    });
+
+    tweet.commentCount = commentCount;
 
     return res.status(200).json({
       success: true,

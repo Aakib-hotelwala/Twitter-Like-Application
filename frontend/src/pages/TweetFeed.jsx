@@ -49,6 +49,7 @@ const TweetFeed = () => {
   const fetchTweets = async () => {
     try {
       const res = await get("/tweets/all-tweets");
+      console.log("Fetched tweets:", res);
       if (res.success) {
         setTweets(res.tweets);
       }
@@ -208,7 +209,7 @@ const TweetFeed = () => {
                     onClick={onTweetClick}
                   >
                     <FaRegComment />
-                    <span>{tweet.comments?.length || 0}</span>
+                    <span>{tweet.commentCount || 0}</span>
                   </div>
                   <div className="flex items-center gap-1 hover:text-green-400 cursor-pointer">
                     <FaRetweet />

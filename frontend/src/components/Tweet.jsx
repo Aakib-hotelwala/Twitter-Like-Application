@@ -76,7 +76,7 @@ const Tweet = ({ tweet, isLiked, handleLike }) => {
         </div>
         <div className="flex items-center gap-1 hover:text-blue-400 cursor-pointer">
           <FaRegComment />
-          <span>{tweet.comments?.length || 0}</span>
+          <span>{tweet.commentCount || 0}</span>
         </div>
         <div className="flex items-center gap-1 hover:text-green-400 cursor-pointer">
           <FaRetweet />

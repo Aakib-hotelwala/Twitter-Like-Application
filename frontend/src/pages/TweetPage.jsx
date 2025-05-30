@@ -44,7 +44,13 @@ const TweetPage = () => {
 
   return (
     <div className="bg-[#0f1419] min-h-screen p-4 text-white">
-      <Tweet tweet={tweet} isLiked={isLiked} handleLike={handleLike} />
+      <Tweet
+        tweet={tweet}
+        isLiked={isLiked}
+        handleLike={handleLike}
+        commentCount={comments.length}
+      />
+
       <h3 className="mt-6 mb-2 text-lg font-bold">Comments</h3>
       <div className="space-y-4">
         {comments.map((c) => (
