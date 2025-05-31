@@ -5,11 +5,15 @@ import {
   FaRegComment,
   FaImage,
   FaTrash,
+  FaBookmark,
+  FaRegBookmark,
+  FaRegHeart,
 } from "react-icons/fa";
 import { get, put, post } from "../services/endpoints";
 import useAuthStore from "../store/authStore";
 import { useNavigate } from "react-router-dom";
 import ClipLoader from "react-spinners/ClipLoader";
+import { toast } from "react-hot-toast";
 
 const TweetFeed = () => {
   const { user } = useAuthStore();
@@ -49,7 +53,6 @@ const TweetFeed = () => {
   const fetchTweets = async () => {
     try {
       const res = await get("/tweets/all-tweets");
-      console.log("Fetched tweets:", res);
       if (res.success) {
         setTweets(res.tweets);
       }
@@ -66,10 +69,23 @@ const TweetFeed = () => {
 
   const handleLike = async (tweetId) => {
     try {
-      await put(`/tweets/like/${tweetId}`);
-      fetchTweets();
+      const res = await put(`/tweets/like/${tweetId}`);
+      if (res.success) {
+        fetchTweets();
+      }
     } catch (error) {
       console.error("Error liking tweet:", error);
+    }
+  };
+
+  const handleBookmark = async (tweetId) => {
+    try {
+      const res = await put(`/tweets/bookmark/${tweetId}`);
+      if (res.success) {
+        fetchTweets();
+      }
+    } catch (error) {
+      console.error("Error Bookmarking tweet:", error);
     }
   };
 
@@ -98,7 +114,7 @@ const TweetFeed = () => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           className="w-full p-2 bg-[#16181C] text-white border border-gray-600 rounded resize-none focus:outline-none focus:ring focus:ring-blue-500"
-          rows="3"
+          rows="2"
         ></textarea>
 
         {preview && (
@@ -150,6 +166,7 @@ const TweetFeed = () => {
         ) : (
           tweets.map((tweet) => {
             const isLiked = tweet.likes.includes(user._id);
+            const isBookmarked = tweet.bookmarks?.includes(user._id);
 
             const onTweetClick = () => {
               navigate(`/tweet/${tweet._id}`, {
@@ -195,15 +212,25 @@ const TweetFeed = () => {
                   className="flex items-center gap-6 text-gray-400 mt-3 text-sm"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div
-                    className={`flex items-center gap-1 cursor-pointer ${
-                      isLiked ? "text-red-500" : "hover:text-red-500"
-                    }`}
-                    onClick={() => handleLike(tweet._id)}
-                  >
-                    <FaHeart />
-                    <span>{tweet.likes.length}</span>
-                  </div>
+                  {isLiked ? (
+                    <div
+                      className={
+                        "flex items-center gap-1 cursor-pointer text-red-500"
+                      }
+                      onClick={() => handleLike(tweet._id)}
+                    >
+                      <FaHeart />
+                      <span>{tweet.likes.length}</span>
+                    </div>
+                  ) : (
+                    <div
+                      className={"flex items-center gap-1 cursor-pointer"}
+                      onClick={() => handleLike(tweet._id)}
+                    >
+                      <FaRegHeart />
+                      <span>{tweet.likes.length}</span>
+                    </div>
+                  )}
                   <div
                     className="flex items-center gap-1 hover:text-blue-400 cursor-pointer"
                     onClick={onTweetClick}
@@ -211,6 +238,23 @@ const TweetFeed = () => {
                     <FaRegComment />
                     <span>{tweet.commentCount || 0}</span>
                   </div>
+                  {isBookmarked ? (
+                    <div
+                      className={
+                        "flex items-center gap-1 cursor-pointer text-blue-700"
+                      }
+                      onClick={() => handleBookmark(tweet._id)}
+                    >
+                      <FaBookmark />
+                    </div>
+                  ) : (
+                    <div
+                      className={"flex items-center gap-1 cursor-pointer"}
+                      onClick={() => handleBookmark(tweet._id)}
+                    >
+                      <FaRegBookmark />
+                    </div>
+                  )}
                   <div className="flex items-center gap-1 hover:text-green-400 cursor-pointer">
                     <FaRetweet />
                     <span>{tweet.retweetCount || 0}</span>

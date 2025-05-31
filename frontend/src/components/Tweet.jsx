@@ -1,8 +1,21 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { FaHeart, FaRegComment, FaRetweet } from "react-icons/fa";
+import {
+  FaBookmark,
+  FaHeart,
+  FaRegBookmark,
+  FaRegComment,
+  FaRegHeart,
+  FaRetweet,
+} from "react-icons/fa";
 
-const Tweet = ({ tweet, isLiked, handleLike }) => {
+const Tweet = ({
+  tweet,
+  isLiked,
+  handleLike,
+  isBookmarked,
+  handleBookmark,
+}) => {
   const navigate = useNavigate();
 
   const onTweetClick = () => {
@@ -65,19 +78,43 @@ const Tweet = ({ tweet, isLiked, handleLike }) => {
         className="flex items-center gap-6 text-gray-400 mt-3 text-sm"
         onClick={(e) => e.stopPropagation()}
       >
-        <div
-          className={`flex items-center gap-1 cursor-pointer ${
-            isLiked ? "text-red-500" : "hover:text-red-500"
-          }`}
-          onClick={() => handleLike(tweet._id)}
-        >
-          <FaHeart />
-          <span>{tweet.likes.length}</span>
-        </div>
+        {isLiked ? (
+          <div
+            className={"flex items-center gap-1 cursor-pointer text-red-500"}
+            onClick={() => handleLike(tweet._id)}
+          >
+            <FaHeart />
+            <span>{tweet.likes.length}</span>
+          </div>
+        ) : (
+          <div
+            className={"flex items-center gap-1 cursor-pointer"}
+            onClick={() => handleLike(tweet._id)}
+          >
+            <FaRegHeart />
+            <span>{tweet.likes.length}</span>
+          </div>
+        )}
+
         <div className="flex items-center gap-1 hover:text-blue-400 cursor-pointer">
           <FaRegComment />
           <span>{tweet.commentCount || 0}</span>
         </div>
+        {isBookmarked ? (
+          <div
+            className={"flex items-center gap-1 cursor-pointer text-blue-700"}
+            onClick={() => handleBookmark(tweet._id)}
+          >
+            <FaBookmark />
+          </div>
+        ) : (
+          <div
+            className={"flex items-center gap-1 cursor-pointer"}
+            onClick={() => handleBookmark(tweet._id)}
+          >
+            <FaRegBookmark />
+          </div>
+        )}
         <div className="flex items-center gap-1 hover:text-green-400 cursor-pointer">
           <FaRetweet />
           <span>{tweet.retweetCount || 0}</span>

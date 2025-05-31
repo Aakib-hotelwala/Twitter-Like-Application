@@ -6,6 +6,7 @@ import { get, put, post } from "../services/endpoints"; // add `post`
 import useAuthStore from "../store/authStore";
 import ClipLoader from "react-spinners/ClipLoader";
 import { FiSend } from "react-icons/fi";
+import { toast } from "react-hot-toast";
 
 const TweetPage = () => {
   const { user } = useAuthStore();
@@ -29,10 +30,23 @@ const TweetPage = () => {
 
   const handleLike = async (id) => {
     try {
-      await put(`/tweets/like/${id}`);
-      fetchTweetAndComments(); // Refresh data after like/dislike
+      const res = await put(`/tweets/like/${id}`);
+      if (res.success) {
+        fetchTweetAndComments();
+      }
     } catch (error) {
       console.error("Error liking tweet:", error);
+    }
+  };
+
+  const handleBookmark = async (tweetId) => {
+    try {
+      const res = await put(`/tweets/bookmark/${tweetId}`);
+      if (res.success) {
+        fetchTweetAndComments();
+      }
+    } catch (error) {
+      console.error("Error Bookmarking tweet:", error);
     }
   };
 
@@ -61,6 +75,7 @@ const TweetPage = () => {
     );
 
   const isLiked = tweet.likes.includes(user._id);
+  const isBookmarked = tweet.bookmarks?.includes(user._id);
 
   return (
     <div className="bg-[#0f1419] min-h-screen p-4 text-white">
@@ -68,6 +83,8 @@ const TweetPage = () => {
         tweet={tweet}
         isLiked={isLiked}
         handleLike={handleLike}
+        isBookmarked={isBookmarked}
+        handleBookmark={handleBookmark}
         commentCount={comments.length}
       />
 

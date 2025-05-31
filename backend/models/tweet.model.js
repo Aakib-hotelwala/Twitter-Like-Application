@@ -20,6 +20,12 @@ const TweetSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    bookmarks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     retweet: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tweet",

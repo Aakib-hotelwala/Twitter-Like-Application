@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { get, put } from "../services/endpoints";
 import ClipLoader from "react-spinners/ClipLoader";
-import { FaHeart, FaRegComment } from "react-icons/fa";
+import { FaHeart, FaRegComment, FaRegHeart } from "react-icons/fa";
 
 const Comment = ({ comment }) => {
   const [replies, setReplies] = useState([]);
@@ -68,15 +68,25 @@ const Comment = ({ comment }) => {
             className="flex items-center gap-6 text-gray-400 mt-3 text-sm"
             onClick={(e) => e.stopPropagation()}
           >
-            <div
-              className={`flex items-center gap-1 cursor-pointer ${
-                isLiked ? "text-red-500" : "hover:text-red-500"
-              }`}
-              onClick={() => handleLike(comment._id)}
-            >
-              <FaHeart />
-              <span>{likesCount}</span>
-            </div>
+            {isLiked ? (
+              <div
+                className={
+                  "flex items-center gap-1 cursor-pointer text-red-500"
+                }
+                onClick={() => handleLike(comment._id)}
+              >
+                <FaHeart />
+                <span>{likesCount}</span>
+              </div>
+            ) : (
+              <div
+                className={"flex items-center gap-1 cursor-pointer"}
+                onClick={() => handleLike(comment._id)}
+              >
+                <FaRegHeart />
+                <span>{likesCount}</span>
+              </div>
+            )}
             <div
               className="flex items-center gap-1 hover:text-blue-400 cursor-pointer"
               onClick={handleToggleReplies}

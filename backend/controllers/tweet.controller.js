@@ -227,6 +227,40 @@ export const LikeTweetController = async (req, res) => {
   }
 };
 
+// =============== Bookmark Tweet ===============
+export const BookmarkTweetController = async (req, res) => {
+  try {
+    const tweetId = req.params.id;
+    const userId = req.user.id;
+
+    const tweet = await TweetModel.findById(tweetId);
+    if (!tweet || tweet.isDeleted) {
+      return res.status(404).json({ error: true, message: "Tweet not found" });
+    }
+
+    const isBookmarked = tweet.bookmarks.includes(userId);
+    if (isBookmarked) {
+      tweet.bookmarks.pull(userId); // Remove
+    } else {
+      tweet.bookmarks.push(userId); // Add
+    }
+
+    await tweet.save();
+
+    return res.status(200).json({
+      success: true,
+      message: isBookmarked ? "Bookmark removed" : "Tweet bookmarked",
+      bookmarked: !isBookmarked,
+    });
+  } catch (error) {
+    console.error("Bookmark Tweet Error:", error);
+    return res.status(500).json({
+      error: true,
+      message: "Internal Server Error",
+    });
+  }
+};
+
 // =============== Retweet ===============
 export const RetweetController = async (req, res) => {
   try {
