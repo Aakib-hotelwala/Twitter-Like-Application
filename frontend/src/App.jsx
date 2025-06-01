@@ -7,6 +7,7 @@ import useThemeStore from "../src/store/themeStore";
 import { useEffect } from "react";
 import TweetFeed from "../src/pages/TweetFeed"; // 🆕 default main content
 import TweetPage from "./pages/TweetPage";
+import Register from "./pages/Register";
 
 const App = () => {
   const { theme } = useThemeStore();
@@ -19,6 +20,7 @@ const App = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
       {/* Protected layout route */}
       <Route element={<ProtectedRoute allowedRoles={["user", "admin"]} />}>
