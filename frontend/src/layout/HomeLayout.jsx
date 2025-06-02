@@ -15,30 +15,96 @@ const HomeLayout = () => {
   return (
     <div className="grid grid-cols-12 min-h-screen bg-[#000] text-white">
       {/* LEFT SIDEBAR */}
-      <aside className="col-span-3 p-4 space-y-4 border-r border-gray-800 h-screen overflow-y-auto">
-        <div className="bg-[#16181C] p-4 rounded">
-          <h2 className="text-lg font-semibold mb-2">
-            Welcome, {user?.fullName}
+      <aside className="col-span-3 p-4 space-y-6 border-r border-gray-800 h-screen overflow-y-auto bg-black text-white">
+        {/* Profile Info */}
+        <div className="flex flex-col items-center bg-[#16181C] p-4 rounded">
+          {user?.profilePicture ? (
+            <img
+              src={user.profilePicture}
+              alt="profile"
+              className="w-24 h-24 rounded-full border-2 border-blue-500"
+            />
+          ) : (
+            <FaUserCircle className="w-24 h-24 text-gray-600 border-2 border-blue-500 rounded-full" />
+          )}
+          <h2 className="text-lg font-semibold mt-2 text-white text-center">
+            {user?.fullName || "User"}
           </h2>
-          <img
-            src={user?.profilePicture || "/default-avatar.png"}
-            alt="profile"
-            className="w-16 h-16 rounded-full mx-auto"
-          />
+          <p className="text-sm text-gray-400">
+            @{user?.username || "username"}
+          </p>
         </div>
-        <div className="bg-[#16181C] p-4 rounded">
+
+        {/* Navigation */}
+        <nav className="bg-[#16181C] p-4 rounded space-y-4">
+          <ul className="space-y-3 text-[#1D9BF0] font-medium">
+            <li>
+              <Link to="/" className="hover:text-white">
+                🏠 Home
+              </Link>
+            </li>
+            <li>
+              <Link to="/profile" className="hover:text-white">
+                👤 Profile
+              </Link>
+            </li>
+            <li>
+              <Link to="/likes" className="hover:text-white">
+                ❤️ Likes
+              </Link>
+            </li>
+            <li>
+              <Link to="/comments" className="hover:text-white">
+                💬 Comments
+              </Link>
+            </li>
+            <li>
+              <Link to="/following" className="hover:text-white">
+                🔁 Following
+              </Link>
+            </li>
+          </ul>
+        </nav>
+
+        {/* Admin Section */}
+        {user?.role === "admin" && (
+          <div className="bg-[#16181C] p-4 rounded space-y-3">
+            <h3 className="text-sm uppercase text-gray-400">Admin Panel</h3>
+            <ul className="space-y-2 text-[#1D9BF0] font-medium">
+              <li>
+                <Link to="/admin/users" className="hover:text-white">
+                  🧑‍💻 All Users
+                </Link>
+              </li>
+              <li>
+                <Link to="/admin/toggle-status" className="hover:text-white">
+                  🔄 Toggle Status
+                </Link>
+              </li>
+              <li>
+                <Link to="/admin/change-role" className="hover:text-white">
+                  🛠️ Change Role
+                </Link>
+              </li>
+            </ul>
+          </div>
+        )}
+
+        {/* Settings & Logout */}
+        <div className="bg-[#16181C] p-4 rounded space-y-2">
           <ul className="space-y-2 text-[#1D9BF0] font-medium">
             <li>
-              <Link to="">Home</Link>
+              <Link to="/settings" className="hover:text-white">
+                ⚙️ Settings
+              </Link>
             </li>
             <li>
-              <Link to="profile">Profile</Link>
-            </li>
-            <li>
-              <Link to="likes">Likes</Link>
-            </li>
-            <li>
-              <Link to="comments">Comments</Link>
+              <button
+                className="text-left w-full hover:text-red-500"
+                onClick=""
+              >
+                🚪 Logout
+              </button>
             </li>
           </ul>
         </div>

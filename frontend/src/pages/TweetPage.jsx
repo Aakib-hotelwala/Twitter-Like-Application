@@ -17,7 +17,7 @@ const TweetPage = () => {
   const [loading, setLoading] = useState(false);
 
   const fetchTweetAndComments = async () => {
-    const tweetRes = await get(`/tweets/${tweetId}`);
+    const tweetRes = await get(`/tweets/tweet/${tweetId}`);
     setTweet(tweetRes.tweet);
 
     const commentsRes = await get(`/comments/tweet/${tweetId}`);

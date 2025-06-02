@@ -24,7 +24,8 @@ router.post(
   CreateTweetController
 );
 router.get("/all-tweets", requireAuth, GetTweetsController);
-router.get("/:id", requireAuth, GetTweetByIdController);
+router.get("/trending-hashtags", requireAuth, GetTrendingHashtagsController);
+router.get("/tweet/:id", requireAuth, GetTweetByIdController);
 router.put(
   "/update/:id",
   requireAuth,
@@ -36,7 +37,6 @@ router.put("/like/:id", requireAuth, LikeTweetController);
 router.put("/bookmark/:id", requireAuth, BookmarkTweetController);
 router.post("/retweet/:id", requireAuth, RetweetController);
 router.get("/hashtag/:hashtag", requireAuth, GetTweetsByHashtagController);
-router.get("/trending-hashtags", requireAuth, GetTrendingHashtagsController);
-router.get("/:username", requireAuth, GetTweetsByUsernameController);
+router.get("/user/:username", requireAuth, GetTweetsByUsernameController);
 
 export default router;
