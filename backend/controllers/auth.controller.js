@@ -265,7 +265,10 @@ export const GetCurrentUserController = async (req, res) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await UserModel.findById(decoded.id).select("-password");
+    const user = await UserModel.findById(decoded.id)
+      .select("-password")
+      .populate("followers", "fullName username profilePicture")
+      .populate("following", "fullName username profilePicture");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
