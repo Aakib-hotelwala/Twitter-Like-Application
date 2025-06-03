@@ -47,7 +47,7 @@ const Profile = () => {
           <FaUserCircle className="w-28 h-28 text-gray-600 border-4 border-gray-800 rounded-full" />
         )}
         <button
-          onClick={() => navigate("/edit-profile")}
+          onClick={() => navigate("/edit-profile", { state: { user } })}
           className="px-5 py-2 border border-gray-600 rounded-full text-white hover:bg-blue-700 transition cursor-pointer"
         >
           Edit Profile
