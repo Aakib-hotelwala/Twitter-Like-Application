@@ -1,5 +1,7 @@
 import { Outlet, Link } from "react-router-dom";
 import useAuthStore from "../store/authStore";
+import { FaTwitter } from "react-icons/fa";
+import TweetifyLogo from "../assets/Tweetify_Logo.png";
 
 const HomeLayout = () => {
   const { user } = useAuthStore();
@@ -17,22 +19,14 @@ const HomeLayout = () => {
       {/* LEFT SIDEBAR */}
       <aside className="col-span-3 p-4 space-y-6 border-r border-gray-800 h-screen overflow-y-auto bg-black text-white">
         {/* Profile Info */}
+
         <div className="flex flex-col items-center bg-[#16181C] p-4 rounded">
-          {user?.profilePicture ? (
-            <img
-              src={user.profilePicture}
-              alt="profile"
-              className="w-24 h-24 rounded-full border-2 border-blue-500"
-            />
-          ) : (
-            <FaUserCircle className="w-24 h-24 text-gray-600 border-2 border-blue-500 rounded-full" />
-          )}
-          <h2 className="text-lg font-semibold mt-2 text-white text-center">
-            {user?.fullName || "User"}
-          </h2>
-          <p className="text-sm text-gray-400">
-            @{user?.username || "username"}
-          </p>
+          <Link to="/">
+            <img src={TweetifyLogo} alt="Tweetify Logo" className="w-16 h-16" />
+            <h2 className="text-lg font-semibold mt-2 text-white text-center">
+              Tweetify
+            </h2>
+          </Link>
         </div>
 
         {/* Navigation */}
