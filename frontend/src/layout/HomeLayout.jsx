@@ -1,10 +1,23 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import { FaTwitter } from "react-icons/fa";
 import TweetifyLogo from "../assets/Tweetify_Logo.png";
+import { get, post } from "../services/endpoints";
 
 const HomeLayout = () => {
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleLogout = async () => {
+    try {
+      await post("/users/logout");
+      logout(); // clear auth store + localStorage
+      navigate("/login", { state: { from: location }, replace: true });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   const hashtags = [
     "#ReactJS",
@@ -94,8 +107,8 @@ const HomeLayout = () => {
             </li>
             <li>
               <button
-                className="text-left w-full hover:text-red-500"
-                onClick=""
+                className="text-left w-full hover:text-red-500 cursor-pointer"
+                onClick={handleLogout}
               >
                 🚪 Logout
               </button>
