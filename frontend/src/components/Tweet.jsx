@@ -10,11 +10,14 @@ import {
 } from "react-icons/fa";
 
 const Tweet = ({
+  user,
   tweet,
   isLiked,
   handleLike,
   isBookmarked,
   handleBookmark,
+  isFollowing,
+  handleFollowToggle,
 }) => {
   const navigate = useNavigate();
 
@@ -44,16 +47,33 @@ const Tweet = ({
       onClick={onTweetClick}
     >
       {/* Header */}
-      <div className="flex items-center mb-2">
-        <img
-          src={tweet.user.profilePicture || "/default-avatar.png"}
-          alt={tweet.user.username}
-          className="w-10 h-10 rounded-full mr-3"
-        />
-        <div>
-          <h4 className="font-semibold">{tweet.user.fullName}</h4>
-          <span className="text-sm text-gray-400">@{tweet.user.username}</span>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center">
+          <img
+            src={tweet.user.profilePicture || "/default-avatar.png"}
+            alt={tweet.user.username}
+            className="w-10 h-10 rounded-full mr-3"
+          />
+          <div>
+            <h4 className="font-semibold">{tweet.user.fullName}</h4>
+            <span className="text-sm text-gray-400">
+              @{tweet.user.username}
+            </span>
+          </div>
         </div>
+
+        {/* Follow Button */}
+        {tweet.user._id !== user?._id && (
+          <button
+            className="text-sm px-3 py-1 rounded-full border border-white text-white hover:bg-white hover:text-black transition duration-150 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleFollowToggle(tweet.user._id);
+            }}
+          >
+            {isFollowing ? "Unfollow" : "Follow"}
+          </button>
+        )}
       </div>
 
       {/* Content */}

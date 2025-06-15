@@ -12,6 +12,8 @@ import {
   FollowUserController,
   ToggleUserStatusController,
   GetAllUsersController,
+  getFollowingController,
+  getFollowersController,
 } from "../controllers/auth.controller.js";
 import { requireAuth, requireRole } from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadImageMiddleware.js";
@@ -20,6 +22,10 @@ router.post("/register", upload.single("profilePicture"), RegisterController);
 router.post("/login", LoginController);
 
 router.post("/logout", requireAuth, LogoutController);
+
+router.get("/following", requireAuth, getFollowingController);
+router.get("/followers", requireAuth, getFollowersController);
+
 router.put(
   "/update-profile",
   requireAuth,

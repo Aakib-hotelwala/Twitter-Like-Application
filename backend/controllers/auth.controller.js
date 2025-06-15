@@ -397,3 +397,63 @@ export const GetAllUsersController = async (req, res) => {
     });
   }
 };
+
+// ================= Get Following List =================
+export const getFollowingController = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await UserModel.findById(userId)
+      .select("following")
+      .populate("following", "fullName username profilePicture");
+
+    if (!user) {
+      return res.status(404).json({
+        error: true,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Following list fetched successfully",
+      following: user.following,
+    });
+  } catch (error) {
+    console.error("Get Following Error:", error);
+    return res.status(500).json({
+      error: true,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+// ================= Get Followers List =================
+export const getFollowersController = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await UserModel.findById(userId)
+      .select("followers")
+      .populate("followers", "fullName username profilePicture");
+
+    if (!user) {
+      return res.status(404).json({
+        error: true,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Followers list fetched successfully",
+      followers: user.followers,
+    });
+  } catch (error) {
+    console.error("Get Followers Error:", error);
+    return res.status(500).json({
+      error: true,
+      message: "Internal Server Error",
+    });
+  }
+};

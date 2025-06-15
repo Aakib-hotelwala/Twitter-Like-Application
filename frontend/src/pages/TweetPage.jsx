@@ -2,23 +2,31 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Tweet from "../components/Tweet";
 import Comment from "../components/Comment";
-import { get, put, post } from "../services/endpoints"; // add `post`
+import { get, put, post } from "../services/endpoints";
 import useAuthStore from "../store/authStore";
 import ClipLoader from "react-spinners/ClipLoader";
 import { FiSend } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 
 const TweetPage = () => {
-  const { user } = useAuthStore();
+  const { user, setUser } = useAuthStore();
   const { id: tweetId } = useParams();
+
   const [tweet, setTweet] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false); // ✅ state added
 
   const fetchTweetAndComments = async () => {
     const tweetRes = await get(`/tweets/tweet/${tweetId}`);
     setTweet(tweetRes.tweet);
+
+    const followRes = await get("/users/following");
+    const followingIds = followRes.following?.map((u) => u._id) || [];
+
+    const isFollowingTweetUser = followingIds.includes(tweetRes.tweet.user._id);
+    setIsFollowing(isFollowingTweetUser);
 
     const commentsRes = await get(`/comments/tweet/${tweetId}`);
     setComments(commentsRes.comments);
@@ -27,6 +35,23 @@ const TweetPage = () => {
   useEffect(() => {
     fetchTweetAndComments();
   }, [tweetId]);
+
+  const handleFollowToggle = async (targetUserId) => {
+    try {
+      const res = await post("/users/follow", { targetUserId });
+
+      if (res.success) {
+        toast.success(res.message || "Follow status updated");
+        setIsFollowing((prev) => !prev); // just toggle
+        // ❌ Remove: await fetchTweetAndComments();
+      } else {
+        toast.error(res.message || "Failed to update follow status");
+      }
+    } catch (error) {
+      console.error("Error following/un-following user:", error);
+      toast.error("Something went wrong");
+    }
+  };
 
   const handleLike = async (id) => {
     try {
@@ -51,7 +76,7 @@ const TweetPage = () => {
   };
 
   const handleAddComment = async () => {
-    if (!newComment.trim()) return; // avoid empty comments
+    if (!newComment.trim()) return;
     setLoading(true);
     try {
       await post("/comments/create", {
@@ -59,7 +84,7 @@ const TweetPage = () => {
         tweet: tweetId,
       });
       setNewComment("");
-      await fetchTweetAndComments(); // refresh comments & tweet data
+      await fetchTweetAndComments();
     } catch (error) {
       console.error("Error adding comment:", error);
     } finally {
@@ -80,12 +105,15 @@ const TweetPage = () => {
   return (
     <div className="bg-[#0f1419] min-h-screen p-4 text-white">
       <Tweet
+        user={user}
         tweet={tweet}
         isLiked={isLiked}
         handleLike={handleLike}
         isBookmarked={isBookmarked}
         handleBookmark={handleBookmark}
         commentCount={comments.length}
+        isFollowing={isFollowing} // ✅ passed correctly
+        handleFollowToggle={handleFollowToggle}
       />
 
       {/* Add Comment Box */}
