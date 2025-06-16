@@ -44,18 +44,27 @@ export const GetCommentsByTweet = async (req, res) => {
       isDeleted: false,
       parentComment: null,
     })
-      .populate("user", "username profilePicture") // populate user info
+      .populate("user", "username profilePicture")
       .sort({ createdAt: -1 });
 
-    // Add likesCount and isLiked properties
-    const processedComments = comments.map((comment) => {
-      const likesArray = comment.likes || [];
-      return {
-        ...comment.toObject(),
-        likesCount: likesArray.length,
-        isLiked: likesArray.some((userId) => userId.equals(currentUserId)),
-      };
-    });
+    // Use Promise.all to handle asynchronous mapping
+    const processedComments = await Promise.all(
+      comments.map(async (comment) => {
+        const likesArray = comment.likes || [];
+
+        const repliesCount = await CommentModel.countDocuments({
+          parentComment: comment._id,
+          isDeleted: false,
+        });
+
+        return {
+          ...comment.toObject(),
+          likesCount: likesArray.length,
+          isLiked: likesArray.some((userId) => userId.equals(currentUserId)),
+          repliesCount,
+        };
+      })
+    );
 
     res.status(200).json({ success: true, comments: processedComments });
   } catch (error) {
@@ -68,15 +77,34 @@ export const GetCommentsByTweet = async (req, res) => {
 export const GetRepliesByComment = async (req, res) => {
   try {
     const parentCommentId = req.params.commentId;
+    const currentUserId = req.user._id;
 
     const replies = await CommentModel.find({
       parentComment: parentCommentId,
       isDeleted: false,
     })
-      .populate("user", "username profilePicture")
-      .sort({ createdAt: 1 }); // older first
+      .populate("user", "username profilePicture fullName")
+      .sort({ createdAt: 1 }); // oldest first
 
-    res.status(200).json({ success: true, replies });
+    const processedReplies = await Promise.all(
+      replies.map(async (reply) => {
+        const repliesCount = await CommentModel.countDocuments({
+          parentComment: reply._id,
+          isDeleted: false,
+        });
+
+        return {
+          ...reply.toObject(),
+          repliesCount,
+          isLiked:
+            reply.likes?.some(
+              (id) => id.toString() === currentUserId.toString()
+            ) || false,
+        };
+      })
+    );
+
+    res.status(200).json({ success: true, replies: processedReplies });
   } catch (error) {
     console.error("Get Replies By Comment Error:", error);
     res.status(500).json({ error: true, message: "Internal Server Error" });

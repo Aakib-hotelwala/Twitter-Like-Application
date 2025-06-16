@@ -9,27 +9,36 @@ import { FiSend } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 
 const TweetPage = () => {
-  const { user, setUser } = useAuthStore();
+  const { user } = useAuthStore();
   const { id: tweetId } = useParams();
 
   const [tweet, setTweet] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
+  const [commentsLoading, setCommentsLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false); // ✅ state added
 
   const fetchTweetAndComments = async () => {
-    const tweetRes = await get(`/tweets/tweet/${tweetId}`);
-    setTweet(tweetRes.tweet);
+    setCommentsLoading(true); // Start loading
+    try {
+      const tweetRes = await get(`/tweets/tweet/${tweetId}`);
+      setTweet(tweetRes.tweet);
 
-    const followRes = await get("/users/following");
-    const followingIds = followRes.following?.map((u) => u._id) || [];
+      const followRes = await get("/users/following");
+      const followingIds = followRes.following?.map((u) => u._id) || [];
+      const isFollowingTweetUser = followingIds.includes(
+        tweetRes.tweet.user._id
+      );
+      setIsFollowing(isFollowingTweetUser);
 
-    const isFollowingTweetUser = followingIds.includes(tweetRes.tweet.user._id);
-    setIsFollowing(isFollowingTweetUser);
-
-    const commentsRes = await get(`/comments/tweet/${tweetId}`);
-    setComments(commentsRes.comments);
+      const commentsRes = await get(`/comments/tweet/${tweetId}`);
+      setComments(commentsRes.comments);
+    } catch (err) {
+      console.error("Error fetching tweet/comments:", err);
+    } finally {
+      setCommentsLoading(false); // End loading
+    }
   };
 
   useEffect(() => {
@@ -117,39 +126,59 @@ const TweetPage = () => {
       />
 
       {/* Add Comment Box */}
-      <div className="mt-6 mb-4 flex items-center gap-2">
-        <textarea
-          rows={1}
-          placeholder="Write a comment..."
-          className="flex-grow p-2 rounded bg-[#1c1c1c] text-white border border-gray-600 resize-none"
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          disabled={loading}
-        />
-        <button
-          onClick={handleAddComment}
-          disabled={loading || !newComment.trim()}
-          className={`p-2 rounded ${
-            loading || !newComment.trim()
-              ? "bg-gray-600 cursor-not-allowed"
-              : "bg-blue-500 hover:bg-blue-600 cursor-pointer"
-          } text-white flex items-center justify-center`}
-          aria-label="Post comment"
-        >
-          {loading ? (
-            <ClipLoader color="#ffffff" size={20} />
-          ) : (
-            <FiSend size={20} />
-          )}
-        </button>
+      <div className="mt-6 mb-4 flex flex-col gap-2">
+        <div className="flex items-start gap-2">
+          <textarea
+            rows={1}
+            placeholder="Write a comment..."
+            className="flex-grow p-2 rounded bg-[#1c1c1c] text-white border border-gray-600 resize-none"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            disabled={loading}
+          />
+          <button
+            onClick={handleAddComment}
+            disabled={loading || !newComment.trim()}
+            className={`p-2 rounded ${
+              loading || !newComment.trim()
+                ? "bg-gray-600 cursor-not-allowed"
+                : "bg-blue-500 hover:bg-blue-600 cursor-pointer"
+            } text-white flex items-center justify-center`}
+            aria-label="Post comment"
+          >
+            {loading ? (
+              <ClipLoader color="#ffffff" size={20} />
+            ) : (
+              <FiSend size={20} />
+            )}
+          </button>
+        </div>
+
+        {/* Cancel Button only when there's text */}
+        {newComment.trim().length > 0 && (
+          <div className="flex justify-between items-center">
+            <button
+              onClick={() => setNewComment("")}
+              className="text-sm text-red-400 border border-red-400 px-3 py-1 rounded hover:bg-red-500 hover:text-white transition cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
 
       <h3 className="mt-6 mb-2 text-lg font-bold">Comments</h3>
-      <div className="space-y-4">
-        {comments.map((c) => (
-          <Comment key={c._id} comment={c} />
-        ))}
-      </div>
+      {commentsLoading ? (
+        <div className="flex justify-center py-10">
+          <ClipLoader color="#ffffff" size={30} />
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {comments.map((c) => (
+            <Comment key={c._id} comment={c} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

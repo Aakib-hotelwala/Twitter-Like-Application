@@ -46,28 +46,8 @@ const HomeLayout = () => {
         <nav className="bg-[#16181C] p-4 rounded space-y-4">
           <ul className="space-y-3 text-[#1D9BF0] font-medium">
             <li>
-              <Link to="/" className="hover:text-white">
-                🏠 Home
-              </Link>
-            </li>
-            <li>
               <Link to="/profile" className="hover:text-white">
                 👤 Profile
-              </Link>
-            </li>
-            <li>
-              <Link to="/likes" className="hover:text-white">
-                ❤️ Likes
-              </Link>
-            </li>
-            <li>
-              <Link to="/comments" className="hover:text-white">
-                💬 Comments
-              </Link>
-            </li>
-            <li>
-              <Link to="/following" className="hover:text-white">
-                🔁 Following
               </Link>
             </li>
           </ul>
