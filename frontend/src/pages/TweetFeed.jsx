@@ -178,6 +178,7 @@ const TweetFeed = () => {
               <div
                 key={tweet._id}
                 className="bg-[#16181C] text-white p-4 rounded border border-gray-700 hover:bg-[#1d1f23] cursor-pointer"
+                onClick={onTweetClick}
               >
                 {/* Header */}
                 <div className="flex items-center mb-2">
