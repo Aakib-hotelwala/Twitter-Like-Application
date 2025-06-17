@@ -11,6 +11,7 @@ import {
   GetTweetsByUsernameController,
   GetTweetByIdController,
   BookmarkTweetController,
+  GetBookmarkedTweetsController,
 } from "../controllers/tweet.controller.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadImageMiddleware.js";
@@ -35,6 +36,7 @@ router.put(
 router.delete("/delete/:id", requireAuth, DeleteTweetController);
 router.put("/like/:id", requireAuth, LikeTweetController);
 router.put("/bookmark/:id", requireAuth, BookmarkTweetController);
+router.get("/bookmarks", requireAuth, GetBookmarkedTweetsController);
 router.post("/retweet/:id", requireAuth, RetweetController);
 router.get("/hashtag/:hashtag", requireAuth, GetTweetsByHashtagController);
 router.get("/user/:username", requireAuth, GetTweetsByUsernameController);

@@ -9,6 +9,7 @@ import TweetFeed from "../src/pages/TweetFeed"; // 🆕 default main content
 import TweetPage from "./pages/TweetPage";
 import Register from "./pages/Register";
 import EditProfile from "./pages/EditProfile";
+import BookmarkedTweets from "./pages/BookmarkedTweets";
 
 const App = () => {
   const { theme } = useThemeStore();
@@ -30,6 +31,7 @@ const App = () => {
           <Route index element={<TweetFeed />} /> {/* 🟢 default home */}
           <Route path="tweet/:id" element={<TweetPage />} />"
           <Route path="profile" element={<Profile />} />
+          <Route path="bookmarks" element={<BookmarkedTweets />} />
           <Route path="edit-profile" element={<EditProfile />} />
           {/* Add likes/comments later if needed */}
         </Route>

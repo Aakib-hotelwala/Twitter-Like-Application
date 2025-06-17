@@ -50,6 +50,11 @@ const HomeLayout = () => {
                 👤 Profile
               </Link>
             </li>
+            <li>
+              <Link to="/bookmarks" className="hover:text-white">
+                📑 Bookmarks
+              </Link>
+            </li>
           </ul>
         </nav>
 

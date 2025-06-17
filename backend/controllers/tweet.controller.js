@@ -402,3 +402,46 @@ export const GetTweetsByUsernameController = async (req, res) => {
     });
   }
 };
+
+export const GetBookmarkedTweetsController = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const bookmarkedTweets = await TweetModel.find({
+      bookmarks: userId,
+      isDeleted: false,
+    })
+      .populate("user", "fullName username profilePicture")
+      .populate("retweet")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Get comment counts
+    const tweetIds = bookmarkedTweets.map((tweet) => tweet._id);
+    const commentCounts = await CommentModel.aggregate([
+      { $match: { tweet: { $in: tweetIds }, isDeleted: false } },
+      { $group: { _id: "$tweet", count: { $sum: 1 } } },
+    ]);
+
+    const countMap = {};
+    commentCounts.forEach((item) => {
+      countMap[item._id.toString()] = item.count;
+    });
+
+    const tweetsWithCommentCount = bookmarkedTweets.map((tweet) => ({
+      ...tweet,
+      commentCount: countMap[tweet._id.toString()] || 0,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      tweets: tweetsWithCommentCount,
+    });
+  } catch (error) {
+    console.error("Get Bookmarked Tweets Error:", error);
+    return res.status(500).json({
+      error: true,
+      message: "Internal Server Error",
+    });
+  }
+};
