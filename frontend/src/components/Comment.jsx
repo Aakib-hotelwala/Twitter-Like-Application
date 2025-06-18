@@ -3,8 +3,11 @@ import { get, put, post } from "../services/endpoints";
 import ClipLoader from "react-spinners/ClipLoader";
 import { FaHeart, FaRegComment, FaRegHeart } from "react-icons/fa";
 import { FiSend } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 const Comment = ({ comment, depth = 0 }) => {
+  const navigate = useNavigate();
+
   const [replies, setReplies] = useState([]);
   const [loadingReplies, setLoadingReplies] = useState(false);
   const [hasReplies, setHasReplies] = useState(comment.repliesCount > 0);
@@ -84,13 +87,26 @@ const Comment = ({ comment, depth = 0 }) => {
         <img
           src={comment.user.profilePicture || "/default-avatar.png"}
           alt="profile"
-          className={`rounded-full ${depth > 0 ? "w-6 h-6" : "w-8 h-8"}`}
+          className={`rounded-full cursor-pointer ${
+            depth > 0 ? "w-6 h-6" : "w-8 h-8"
+          }`}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/profile/${comment.user.username}`);
+          }}
         />
 
         <div className="flex flex-col w-full">
           <p className="text-sm text-gray-300 font-semibold">
-            {comment.user.fullName}{" "}
-            <span className="text-gray-500">@{comment.user.username}</span>
+            <span
+              className="text-gray-500 hover:text-gray-100 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/profile/${comment.user.username}`);
+              }}
+            >
+              @{comment.user.username}
+            </span>
           </p>
           <p className="text-gray-200 mt-1">{comment.text}</p>
           <p className="text-xs text-gray-500 mt-1">

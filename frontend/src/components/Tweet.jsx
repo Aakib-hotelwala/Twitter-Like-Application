@@ -52,11 +52,21 @@ const Tweet = ({
           <img
             src={tweet.user.profilePicture || "/default-avatar.png"}
             alt={tweet.user.username}
-            className="w-10 h-10 rounded-full mr-3"
+            className="w-10 h-10 rounded-full mr-3 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/profile/${tweet.user.username}`);
+            }}
           />
           <div>
             <h4 className="font-semibold">{tweet.user.fullName}</h4>
-            <span className="text-sm text-gray-400">
+            <span
+              className="text-sm text-gray-400 hover:text-gray-100 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/profile/${tweet.user.username}`);
+              }}
+            >
               @{tweet.user.username}
             </span>
           </div>
