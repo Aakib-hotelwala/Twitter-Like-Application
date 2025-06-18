@@ -112,8 +112,12 @@ const UserProfile = () => {
         </div>
       </div>
 
+      <div className="flex justify-center max-w-2xl mx-auto mt-8 px-4 border-b border-gray-700 pb-2">
+        <h3 className="text-xl font-bold text-white ">Tweets</h3>
+      </div>
+
       {/* User's Tweets */}
-      <div className="max-w-2xl mx-auto mt-4">
+      <div className="space-y-4 mt-4">
         <TweetsByUsername username={profileUser.username} />
       </div>
     </>

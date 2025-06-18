@@ -267,7 +267,6 @@ export const RetweetController = async (req, res) => {
     const userId = req.user.id;
     const tweetId = req.params.id;
 
-    // Check if the tweet exists
     const originalTweet = await TweetModel.findById(tweetId);
     if (!originalTweet || originalTweet.isDeleted) {
       return res
@@ -275,7 +274,6 @@ export const RetweetController = async (req, res) => {
         .json({ error: true, message: "Original tweet not found" });
     }
 
-    // Check if user already retweeted this tweet
     const existingRetweet = await TweetModel.findOne({
       user: userId,
       retweet: tweetId,
@@ -291,7 +289,7 @@ export const RetweetController = async (req, res) => {
     const newRetweet = new TweetModel({
       user: userId,
       retweet: tweetId,
-      content: "", // retweet content usually empty
+      content: "",
     });
 
     await newRetweet.save();
@@ -320,12 +318,30 @@ export const GetTweetsByHashtagController = async (req, res) => {
     })
       .populate("user", "fullName username profilePicture")
       .populate("retweet")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const tweetIds = tweets.map((t) => t._id);
+
+    const commentCounts = await CommentModel.aggregate([
+      { $match: { tweet: { $in: tweetIds }, isDeleted: false } },
+      { $group: { _id: "$tweet", count: { $sum: 1 } } },
+    ]);
+
+    const countMap = {};
+    commentCounts.forEach((item) => {
+      countMap[item._id.toString()] = item.count;
+    });
+
+    const tweetsWithCommentCount = tweets.map((tweet) => ({
+      ...tweet,
+      commentCount: countMap[tweet._id.toString()] || 0,
+    }));
 
     return res.status(200).json({
       success: true,
-      count: tweets.length,
-      tweets,
+      count: tweetsWithCommentCount.length,
+      tweets: tweetsWithCommentCount,
     });
   } catch (error) {
     console.error("Get Tweets by Hashtag Error:", error);
@@ -385,14 +401,32 @@ export const GetTweetsByUsernameController = async (req, res) => {
       return res.status(404).json({ error: true, message: "User not found" });
     }
 
+    // Get tweets
     const tweets = await TweetModel.find({ user: user._id, isDeleted: false })
       .populate("user", "fullName username profilePicture")
       .populate("retweet")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const tweetIds = tweets.map((t) => t._id);
+    const commentCounts = await CommentModel.aggregate([
+      { $match: { tweet: { $in: tweetIds }, isDeleted: false } },
+      { $group: { _id: "$tweet", count: { $sum: 1 } } },
+    ]);
+
+    const countMap = {};
+    commentCounts.forEach((item) => {
+      countMap[item._id.toString()] = item.count;
+    });
+
+    const tweetsWithCommentCount = tweets.map((tweet) => ({
+      ...tweet,
+      commentCount: countMap[tweet._id.toString()] || 0,
+    }));
 
     return res.status(200).json({
       success: true,
-      tweets,
+      tweets: tweetsWithCommentCount,
     });
   } catch (error) {
     console.error("Get Tweets by Username Error:", error);
@@ -416,7 +450,6 @@ export const GetBookmarkedTweetsController = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    // Get comment counts
     const tweetIds = bookmarkedTweets.map((tweet) => tweet._id);
     const commentCounts = await CommentModel.aggregate([
       { $match: { tweet: { $in: tweetIds }, isDeleted: false } },
