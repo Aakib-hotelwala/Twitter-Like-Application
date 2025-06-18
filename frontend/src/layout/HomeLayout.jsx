@@ -46,7 +46,10 @@ const HomeLayout = () => {
         <nav className="bg-[#16181C] p-4 rounded space-y-4">
           <ul className="space-y-3 text-[#1D9BF0] font-medium">
             <li>
-              <Link to="/profile" className="hover:text-white">
+              <Link
+                to={`/profile/${user?.username}`}
+                className="hover:text-white"
+              >
                 👤 Profile
               </Link>
             </li>

@@ -284,6 +284,37 @@ export const GetCurrentUserController = async (req, res) => {
   }
 };
 
+// ================= Get User By username =================
+export const GetUserByUsernameController = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await UserModel.findOne({ username }).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ error: true, message: "User not found" });
+    }
+
+    const userData = user.toObject();
+    delete userData.password;
+
+    // Format dateOfBirth before sending response
+    if (userData.dateOfBirth) {
+      userData.dateOfBirth = userData.dateOfBirth.toISOString().split("T")[0];
+    }
+    return res.status(200).json({
+      success: true,
+      message: "User fetched successfully",
+      user: userData,
+    });
+  } catch (error) {
+    console.error("Get User By Username Error:", error);
+    return res.status(500).json({
+      error: true,
+      message: "Internal Server Error",
+    });
+  }
+};
+
 export const ChangeUserRoleController = async (req, res) => {
   try {
     const { userId, newRole } = req.body;

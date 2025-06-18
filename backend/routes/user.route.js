@@ -14,6 +14,7 @@ import {
   GetAllUsersController,
   getFollowingController,
   getFollowersController,
+  GetUserByUsernameController,
 } from "../controllers/auth.controller.js";
 import { requireAuth, requireRole } from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadImageMiddleware.js";
@@ -52,5 +53,6 @@ router.get(
   requireRole(["admin"]),
   GetAllUsersController
 );
+router.get("/:username", requireAuth, GetUserByUsernameController);
 
 export default router;
