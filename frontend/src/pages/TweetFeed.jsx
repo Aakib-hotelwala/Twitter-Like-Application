@@ -11,13 +11,14 @@ import {
 } from "react-icons/fa";
 import { get, put, post } from "../services/endpoints";
 import useAuthStore from "../store/authStore";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-hot-toast";
 
 const TweetFeed = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [tweets, setTweets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,8 +52,26 @@ const TweetFeed = () => {
   };
 
   const fetchTweets = async () => {
+    setLoading(true);
     try {
-      const res = await get("/tweets/all-tweets");
+      const params = new URLSearchParams(location.search);
+      const search = params.get("search");
+
+      let endpoint = "/tweets/all-tweets";
+
+      if (search) {
+        if (search.startsWith("#")) {
+          // Hashtag search
+          const tag = search.slice(1); // Remove '#'
+          endpoint = `/tweets/hashtag/${encodeURIComponent(tag)}`;
+        } else if (!search.startsWith("@")) {
+          // Only run tweet content search if it's not @username
+          endpoint = `/tweets/search?query=${encodeURIComponent(search)}`;
+        }
+        // Else: @username search handled by route redirecting to /profile/:username
+      }
+
+      const res = await get(endpoint);
       if (res.success) {
         setTweets(res.tweets);
       }
@@ -64,8 +83,9 @@ const TweetFeed = () => {
   };
 
   useEffect(() => {
+    setContent(""); // Optional: reset new tweet text
     fetchTweets();
-  }, []);
+  }, [location.search, location.key]);
 
   const handleLike = async (tweetId) => {
     try {
@@ -91,13 +111,19 @@ const TweetFeed = () => {
 
   const formatContentWithHashtags = (content) => {
     const hashtagRegex = /#[\w]+/g;
-    return content.split(hashtagRegex).reduce((acc, part, index, arr) => {
+    const parts = content.split(hashtagRegex);
+    const matches = content.match(hashtagRegex);
+
+    return parts.reduce((acc, part, index) => {
       acc.push(part);
-      const match = content.match(hashtagRegex);
-      if (match && match[index]) {
+      if (matches && matches[index]) {
         acc.push(
-          <span key={index} className="text-blue-400">
-            {match[index]}
+          <span
+            key={index}
+            className="text-blue-400 cursor-pointer hover:underline"
+            onClick={() => navigate(`/?search=${matches[index]}`)}
+          >
+            {matches[index]}
           </span>
         );
       }

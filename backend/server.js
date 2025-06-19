@@ -8,6 +8,7 @@ import ConnectDB from "./utils/db.js";
 import userRoutes from "./routes/user.route.js";
 import tweetRoutes from "./routes/tweet.route.js";
 import commentRoutes from "./routes/comment.route.js";
+import searchRoutes from "./routes/search.route.js";
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use(cookieParser());
 app.use("/api/users", userRoutes);
 app.use("/api/tweets", tweetRoutes);
 app.use("/api/comments", commentRoutes);
+app.use("/api/search", searchRoutes);
 
 // Default route
 app.get("/", (req, res) => {

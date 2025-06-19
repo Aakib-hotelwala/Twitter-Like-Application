@@ -3,11 +3,95 @@ import useAuthStore from "../store/authStore";
 import { FaTwitter } from "react-icons/fa";
 import TweetifyLogo from "../assets/Tweetify_Logo.png";
 import { get, post } from "../services/endpoints";
+import { useEffect } from "react";
+import { useState } from "react";
 
 const HomeLayout = () => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
+  const [hashtags, setHashtags] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  let debounceTimer;
+
+  useEffect(() => {
+    const fetchTrendingHashtags = async () => {
+      try {
+        const res = await get("/tweets/trending-hashtags");
+        if (res.success) {
+          setHashtags(res.trending); // ← Use the correct key
+        }
+      } catch (error) {
+        console.error("Error fetching hashtags:", error);
+      }
+    };
+
+    fetchTrendingHashtags();
+  }, []);
+
+  const handleSearch = (e) => {
+    if (e.key === "Enter" && searchTerm.trim()) {
+      const term = searchTerm.trim();
+
+      if (term.startsWith("@")) {
+        // Navigate to profile page (remove @ from username)
+        navigate(`/profile/${term.substring(1)}`);
+      } else {
+        // Otherwise treat as hashtag or general search
+        navigate(`/?search=${encodeURIComponent(term)}`);
+      }
+    }
+  };
+
+  const handleSearchChange = async (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    clearTimeout(debounceTimer);
+
+    if (!value.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    debounceTimer = setTimeout(async () => {
+      try {
+        const res = await get(
+          `/search/suggestions?query=${encodeURIComponent(value)}`
+        );
+        if (res.success) {
+          const combined = [
+            ...(res.users || []).map((user) => ({
+              type: "user",
+              label: `@${user.username}`,
+              value: user.username,
+            })),
+            ...(res.hashtags || []).map((tag) => ({
+              type: "hashtag",
+              label: `#${tag.hashtag}`,
+              value: tag.hashtag,
+            })),
+          ];
+          setSuggestions(combined);
+          setShowSuggestions(true);
+        }
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+      }
+    }, 300);
+  };
+
+  const handleHashtagClick = (tag) => {
+    navigate(`/?search=${encodeURIComponent(tag)}`);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = () => setShowSuggestions(false);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -18,14 +102,6 @@ const HomeLayout = () => {
       console.error("Logout failed:", error);
     }
   };
-
-  const hashtags = [
-    "#ReactJS",
-    "#WebDev",
-    "#OpenAI",
-    "#TailwindCSS",
-    "#JavaScript",
-  ];
 
   return (
     <div className="grid grid-cols-12 min-h-screen bg-[#000] text-white">
@@ -112,21 +188,55 @@ const HomeLayout = () => {
 
       {/* RIGHT SIDEBAR */}
       <aside className="col-span-3 p-4 space-y-4 border-l border-gray-800 h-screen overflow-y-auto">
-        <div className="bg-[#16181C] p-4 rounded">
+        <div className="bg-[#16181C] p-4 rounded relative">
           <input
             type="text"
             placeholder="Search Twitter"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            onKeyDown={handleSearch}
             className="w-full p-2 bg-[#000] border border-gray-700 text-white rounded focus:outline-none focus:border-[#1D9BF0]"
           />
+
+          {showSuggestions && suggestions.length > 0 && (
+            <ul className="absolute top-full left-0 w-full bg-[#1E1E1E] border border-gray-700 mt-1 z-50 rounded shadow-lg text-white max-h-48 overflow-y-auto">
+              {suggestions.map((item, idx) => (
+                <li
+                  key={idx}
+                  onClick={() => {
+                    setShowSuggestions(false);
+                    setSearchTerm("");
+                    if (item.type === "user") {
+                      navigate(`/profile/${item.value}`);
+                    } else {
+                      navigate(`/?search=%23${item.value}`);
+                    }
+                  }}
+                  className="px-4 py-2 hover:bg-[#2a2a2a] cursor-pointer"
+                >
+                  {item.label}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
+
         <div className="bg-[#16181C] p-4 rounded">
           <h3 className="font-semibold mb-2 text-white">Trending</h3>
           <ul className="space-y-1 text-sm text-gray-400">
-            {hashtags.map((tag, i) => (
-              <li key={i} className="hover:text-[#1D9BF0] cursor-pointer">
-                {tag}
-              </li>
-            ))}
+            {hashtags.length > 0 ? (
+              hashtags.map((item, i) => (
+                <li
+                  key={i}
+                  onClick={() => handleHashtagClick(item.hashtag)}
+                  className="hover:text-[#1D9BF0] cursor-pointer"
+                >
+                  {item.hashtag}
+                </li>
+              ))
+            ) : (
+              <li className="text-gray-500">No trends available</li>
+            )}
           </ul>
         </div>
       </aside>
