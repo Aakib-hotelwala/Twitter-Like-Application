@@ -116,14 +116,16 @@ export const LoginController = async (req, res) => {
     const token = jwt.sign(
       { id: findUser._id, email: findUser.email, role: findUser.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "7d" }
     );
+
+    const isProduction = process.env.NODE_ENV === "production";
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true, // ✅ Required for HTTPS and cross-site
-      sameSite: "None", // ✅ Required for cross-site cookies
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      secure: isProduction, // ✅ true only in production (Render)
+      sameSite: isProduction ? "None" : "Lax", // ✅ cross-site safe
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     const { password: _, ...userData } = findUser.toObject();
